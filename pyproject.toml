@@ -1,7 +1,7 @@
 [project]
-name = "libjam"
-description = "A jam of Python libraries."
-version = "0.2.1"
+name = "cli"
+description = "Create command line interfaces in Python."
+version = "0.0.1"
 
 readme = "README.md"
 license = "GPL-2.0"
@@ -13,22 +13,17 @@ classifiers = [
 ]
 
 requires-python = ">= 3.14"
-dependencies = [
-  "platformdirs >= 4.0.0",
-  "filetype >= 1.0.0",
-  "py7zr >= 1.0.0",
-  "rarfile >= 4.0",
-]
+dependencies = []
 
 [[project.authors]]
 name = "Philipp Kosarev"
 email = "philipp.kosarev@gmail.com"
 
 [project.urls]
-homepage = "https://github.com/philippkosarev/libjam"
-source = "https://github.com/philippkosarev/libjam"
-issues = "https://github.com/philippkosarev/libjam/issues"
-documentation = "https://libjam.readthedocs.io"
+homepage = "https://github.com/philippkosarev/cli"
+source = "https://github.com/philippkosarev/cli"
+issues = "https://github.com/philippkosarev/cli/issues"
+documentation = "https://cli.readthedocs.io"
 
 [dependency-groups]
 docs = [
@@ -45,4 +40,4 @@ build-backend = "hatchling.build"
 requires = ["hatchling"]
 
 [tool.hatch.build.targets.wheel]
-include = ["libjam"]
+include = ["cli"]
