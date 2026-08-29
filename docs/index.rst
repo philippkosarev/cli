@@ -1,43 +1,100 @@
-https://github.com/philippkosarev/libjam
+https://github.com/philippkosarev/cli
 
-libjam
-======
+CLI
+===
 
-A jam of Python libraries.
+Create command line interfaces in Python.
 
-
-Overview
+Examples
 --------
 
-Here is a quick overview of each module/class in libjam:
+Single-command CLI
+^^^^^^^^^^^^^^^^^^
 
-- The :doc:`captain` class provides a boilerplate-free way of creating CLIs.
-- The :doc:`secretary` class is just another program configuration system.
-- The :doc:`writer` module makes it easy to format and style your terminal output.
-- The :doc:`flashcard` module has a few functions for getting user input in the terminal.
-- The :doc:`drawer` module provides some missing file-management pieces.
-- The :doc:`path` class is an extension of ``pathlib.Path`` with :doc:`drawer`'s functionality.
+``example.py`` file:
+
+.. literalinclude:: singlecommand-example.py
+  :language: python
+
+Here is what the user will see when running this CLI:
+
+.. code-block::
+
+  $ ./example.py
+  shout: missing argument <TEXT>
+  Try 'shout --help' for more information.
+
+  $ ./example.py Hello
+  Hello!
+
+  $ ./example.py Hello --world
+  Hello world!
+
+  $ ./example.py --help
+  Usage:
+    shout [OPTION]... <TEXT>
+  Description:
+    Shouts the given text back.
+  Options:
+    -w, --world - Adds ' world' before the exclamation mark.
+    -h, --help  - Prints this page.
 
 
-Installing
-----------
+Multi-command CLI
+^^^^^^^^^^^^^^^^^
 
-Releases are available on `PyPi <https://pypi.org/project/libjam/>`_ and can be installed using pip:
+``example.py`` file:
 
-.. code-block:: sh
+.. literalinclude:: multicommand-example.py
+  :language: python
 
-  pip install libjam
+Here is what the user will see when running this CLI:
+
+.. code-block::
+
+  $ ./example.py
+  very-smart-ai: no command specified.
+  Try 'very-smart-ai --help' for more information.
+
+  $ ./example.py shout "I like crisps"
+  I like crisps!
+
+  $ ./example.py wonder -h
+  Usage:
+     very-smart-ai wonder
+  Description:
+     Where's my copy of My weekend in Stevenage by Filthy Henderson?
+  Options:
+        --mcbeth - Ponder whether to be or not to be.
+     -q --quiet  - Be quiet.
+     -h --help   - Prints this page.
+
+  $ ./example.py wonder --mcbeth
+  I just want to be a fish.
+
+  $ ./example.py --help
+  Trust me, it's the smartest one out there.
+
+  Synopsis:
+     very-smart-ai <COMMAND> ...
+
+  Commands:
+     shout   - I will be loud!
+     whisper - Shhhh! You don't want them to hear you...
+     wonder  - Where's my copy of My weekend in Stevenage by Filthy Henderson?
+
+  Usage:
+     shout <TEXT> [SUFFIX]
+     whisper [LINES]...
+     wonder
+
+  Options:
+     -h --help - Prints this page.
 
 
-Table of contents
------------------
+API
+---
 
-.. toctree::
-  :maxdepth: 2
+.. autoclass:: cli.CLI
 
-  captain
-  secretary
-  writer
-  flashcard
-  drawer
-  path
+.. autofunction:: cli.cli

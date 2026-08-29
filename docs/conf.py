@@ -4,7 +4,7 @@ import sys
 import pypandoc
 
 # Project information
-project = 'libjam'
+project = 'CLI'
 author = 'Philipp Kosarev'
 copyright = f'2026, {author}'
 language = 'en'

@@ -1,9 +1,9 @@
 #! /usr/bin/env python3
 
-from libjam import captain
+from cli import cli
 
 # Creating the CLI
-@captain()
+@cli()
 def shout(text: str, *, world=False):
   """Shouts the given text back."""
   if world:

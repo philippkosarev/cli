@@ -1,13 +1,13 @@
 #! /usr/bin/env python3
 
 # Imports
-from libjam import captain
+from cli import cli
 import sys
 
 
 # Creating the CLI
-@captain('very-smart-ai')
-class cli:
+@cli('very-smart-ai')
+class main:
   "Trust me, it's the smartest one out there."
 
   def shout(text, suffix=None):
@@ -34,11 +34,11 @@ class cli:
 
 
 # Adding options to the wonder command
-cli.wonder_command.add_option(
+main.wonder_command.add_option(
   'mcbeth', 'Ponder whether to be or not to be.',
 )
-cli.wonder_command.add_option('quiet', 'Be quiet.', 'q')
+main.wonder_command.add_option('quiet', 'Be quiet.', 'q')
 
 # Running the CLI
 if __name__ == '__main__':
-  sys.exit(cli())
+  sys.exit(main())
