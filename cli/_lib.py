@@ -483,21 +483,27 @@ def cli(
 
   Example usage:
   ```
-  @cli()
+  @cli
   def echo(text):
     print(text)
   ```
+
+  or
+  ```
+  @cli(name='echo')
+  def main(text):
+    print(text)
+  ```
   """
+  name_is_target = isinstance(name, (function, type))
+  if name_is_target:
+    target = name
+  if not name or name_is_target:
+    name = _DEFAULT_NAME
   def decorator(target) -> CLI:
-    nonlocal name
-    if not name:
-      name = target.__name__.lower()
-      for suffix in ['cli', 'command']:
-        name = name.removesuffix(suffix).removesuffix('_')
-      name = name.replace('_', '-')
-    if not name:
-      name = _DEFAULT_NAME
     return CLI(
       target, name, pass_self, add_help, compact_help, child_kwargs,
     )
+  if name_is_target:
+    return decorator(target)
   return decorator

@@ -11,55 +11,56 @@ Examples
 Single-command CLI
 ^^^^^^^^^^^^^^^^^^
 
-``example.py`` file:
+``shout.py`` file:
 
-.. literalinclude:: singlecommand-example.py
+.. literalinclude:: shout.py
   :language: python
 
 Here is what the user will see when running this CLI:
 
 .. code-block::
 
-  $ ./example.py
-  shout: missing argument <TEXT>
-  Try 'shout --help' for more information.
+  $ ./shout.py
+  shout.py: missing arguments <TEXT>
+  Try 'shout.py --help' for more information.
 
-  $ ./example.py Hello
+  $ ./shout.py Hello
   Hello!
 
-  $ ./example.py Hello --world
+  $ ./shout.py Hello --world
   Hello world!
 
-  $ ./example.py --help
+  $ ./shout.py --help
   Usage:
-    shout [OPTION]... <TEXT>
+     shout.py [OPTIONS]... <TEXT>
   Description:
-    Shouts the given text back.
+     Shouts the given text back.
   Options:
-    -w, --world - Adds ' world' before the exclamation mark.
-    -h, --help  - Prints this page.
+     -w, --world - Adds " world" before the exclamation mark.
+     -h, --help  - Prints this page.
+
 
 
 Multi-command CLI
 ^^^^^^^^^^^^^^^^^
 
-``example.py`` file:
+``multi.py`` file:
 
-.. literalinclude:: multicommand-example.py
+.. literalinclude:: multi.py
   :language: python
 
 Here is what the user will see when running this CLI:
 
 .. code-block::
 
-  $ ./example.py
+  $ ./multi.py
   very-smart-ai: no command specified.
   Try 'very-smart-ai --help' for more information.
 
-  $ ./example.py shout "I like crisps"
+  $ ./multi.py shout "I like crisps"
   I like crisps!
 
-  $ ./example.py wonder -h
+  $ ./multi.py wonder -h
   Usage:
      very-smart-ai wonder
   Description:
@@ -69,10 +70,10 @@ Here is what the user will see when running this CLI:
      -q --quiet  - Be quiet.
      -h --help   - Prints this page.
 
-  $ ./example.py wonder --mcbeth
+  $ ./multi.py wonder --mcbeth
   I just want to be a fish.
 
-  $ ./example.py --help
+  $ ./multi.py --help
   Trust me, it's the smartest one out there.
 
   Synopsis:

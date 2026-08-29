@@ -3,17 +3,17 @@
 from cli import cli
 
 # Creating the CLI
-@cli()
-def shout(text: str, *, world=False):
+@cli
+def shout(text: str, **opts):
   """Shouts the given text back."""
-  if world:
+  if opts['world']:
     text += ' world'
   print(text + '!')
   return 'anything'
 
 # Adding an option to the CLI
 shout.add_option(
-  'world', "Adds ' world' before the exclamation mark.", 'w',
+  'world', 'Adds " world" before the exclamation mark.', 'w',
 )
 
 # Running the CLI
