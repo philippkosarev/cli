@@ -1,22 +1,20 @@
 # Imports
+from types import FunctionType as function
 from dataclasses import dataclass
 import os
 import sys
-import types
 
 # Constants
 _DEFAULT_NAME = os.path.basename(sys.argv[0])
 
 
-def _get_function_args(
-  function: callable,
-) -> tuple[list[str], list[str], str|None]:
-  """Returns the function's parameters."""
-  code = function.__code__
+def _get_function_args(f: function, /) -> tuple[list, list, str|None]:
+  """Gets the function's parameters."""
+  code = f.__code__
   varnames = list(code.co_varnames)
   argcount = code.co_argcount
   n_opts = code.co_kwonlyargcount
-  n_optional = len(function.__defaults__ or [])
+  n_optional = len(f.__defaults__ or [])
   n_required = argcount - n_optional
   if code.co_flags & 0x08:
     n_optional -= n_opts
@@ -32,18 +30,19 @@ def _get_function_args(
 
 def _to_posix_args(
   required: list,
-  optional: list = [],
-  arbitrary: str = None,
+  optional: list|None = None,
+  arbitrary: str|None = None,
 ) -> str:
-  """Returns the POSIX-style representation of given arguments."""
+  """Returns the POSIX-style representation of the given arguments."""
   def fmt(s: str, prefix: str, suffix: str) -> str:
     return prefix + s.replace('_', ' ').upper() + suffix
-  required = [fmt(arg, '<', '>') for arg in required]
-  optional = [fmt(arg, '[', ']') for arg in optional]
-  all_args = required + optional
+  formatted = [fmt(arg, '<', '>') for arg in required]
+  if optional:
+    formatted += [fmt(arg, '[', ']') for arg in optional]
   if arbitrary:
-    all_args.append(fmt(arbitrary, '[', ']...'))
-  return ' '.join(all_args)
+    formatted.append(fmt(arbitrary, '[', ']...'))
+  formatted = ' '.join(formatted)
+  return formatted
 
 
 def _classify_args(items: list[str], /) -> tuple[list, list]:
@@ -123,7 +122,7 @@ class _Option:
   call: callable|None
 
   @property
-  def flags(self):
+  def flags(self) -> list:
     items = []
     if self.shorthand:
       items.append('-' + self.shorthand)
@@ -134,19 +133,19 @@ class _Option:
 class CLI:
   """Creates a CLI around a given function or class.
 
-  The `target` can be either a function, to make a single-command CLI, or
-  a class, to make a multi-command CLI. Its docstring will be used as
-  the CLI's description, shown on the help page.
+  The `target` can be either a function, to make a single-command CLI,
+  or a class, to make a multi-command CLI. Its docstring will be used
+  as the CLI's description, shown on the help page.
 
   If the `target` is a function, then its parameters will be used to
-  create the CLI's arguments. Supports required, optional and arbitrary
-  parameters.
+  create the CLI's arguments. Supports required, optional and
+  arbitrary parameters.
 
-  If the `target` is a class, then its attributes will be used to create
-  the CLI's commands. The `target`'s attributes can be either other
-  `CLI`s, functions or classes. If the attribute is a function or a
-  class, then a new `CLI` will be created using that attribute; the
-  name of this new cli will be set to the parent `CLI`'s name
+  If the `target` is a class, then its attributes will be used to
+  create the CLI's commands. The `target`'s attributes can be either
+  other `CLI`s, functions or classes. If the attribute is a function
+  or a class, then a new `CLI` will be created using that attribute;
+  the name of this new cli will be set to the parent `CLI`'s name
   plus the name of the attribute, as it appears within the class, with
   a space in the middle. For example, if the parent `CLI`'s name is
   "hello" and the function's name, as it appears in the class, is
@@ -155,17 +154,17 @@ class CLI:
   a `CLI` then it's name will remain unchanged. All new `CLI`s
   created by this `CLI`, will be added to this `CLI`, under the
   name of the attribute, as it appeared in the class, plus "_command".
-  This is done to improve ease of access, for example to enabled adding
-  options to these created `CLI`s. This is not done for attributes
-  which were already `CLI`s.
+  This is done to improve ease of access, for example to enabled
+  adding options to these created `CLI`s. This is not done for
+  attributes which were already `CLI`s.
 
   If the `name` is not specified, then `sys.argv[0]` will be used to
   determine the name of the program.
 
   The `compact_help` parameter decides whether the help page sections
-  should be separated by one or two newlines. If not specified, then it
-  will be set to `False` if the specified `target` is a function, and
-  `True` if it's a class.
+  should be separated by one or two newlines. If not specified, then
+  it will be set to `False` if the specified `target` is a function,
+  and `True` if it's a class.
 
   The `child_kwargs` dictionary is passed as keyword arguments to
   children `CLI`s created by this `CLI` (only applies if the
@@ -215,12 +214,12 @@ class CLI:
 
   def __init__(
     self,
-    target: callable or type,
-    name: str = None,
+    target: function|type,
+    name: str|None = None,
     pass_self: bool = False,
     add_help: bool = True,
-    compact_help: bool = None,
-    child_kwargs: dict = {},
+    compact_help: bool|None = None,
+    child_kwargs: dict|None = None,
   ):
     self.target = target
     self.name = name or _DEFAULT_NAME
@@ -229,13 +228,13 @@ class CLI:
     self.compact_help = compact_help
     self.options = []
     self.add_help = add_help
-    self.child_kwargs = child_kwargs
+    self.child_kwargs = child_kwargs or {}
     if add_help:
       self.add_option(
         'help', 'Prints this page.', 'h',
         self.print_help_and_exit,
       )
-    if isinstance(target, types.FunctionType):
+    if isinstance(target, function):
       self._singlecommand_init()
     elif isinstance(target, type):
       self._multicommand_init()
@@ -267,7 +266,7 @@ class CLI:
       if name.startswith('_'):
         continue
       command_name = name.replace('_', '-')
-      if isinstance(attr, (types.FunctionType, type)):
+      if isinstance(attr, (function, type)):
         command = CLI(
           attr, f'{self.name} {command_name}', **self.child_kwargs,
         )
@@ -283,9 +282,9 @@ class CLI:
   def add_option(
     self,
     name: str,
-    description: str = None,
-    shorthand: str = None,
-    call: callable = None,
+    description: str|None = None,
+    shorthand: str|None = None,
+    call: callable|None = None,
   ):
     """Adds an option to the CLI.
 
@@ -473,11 +472,11 @@ class CLI:
 
 
 def cli(
-  name: str = None,
+  name: str|None = None,
   pass_self: bool = False,
   add_help: bool = True,
-  compact_help: bool = None,
-  child_kwargs: dict = {},
+  compact_help: bool|None = None,
+  child_kwargs: dict|None = None,
 ) -> callable:
   """Returns a decorator that takes either a function or a class and
   returns a `CLI`.
