@@ -132,7 +132,7 @@ class _Option:
     return items
 
 
-class Captain:
+class CLI:
   """Creates a CLI around a given function or class.
 
   The `ship` can be either a function, to make a single-command CLI, or
@@ -145,20 +145,20 @@ class Captain:
 
   If the `ship` is a class, then its attributes will be used to create
   the CLI's commands. The `ship`'s attributes can be either other
-  `Captain`s, functions or classes. If the attribute is a function or a
-  class, then a new `Captain` will be created using that attribute; the
-  name of this new captain will be set to the parent `Captain`'s name
+  `CLI`s, functions or classes. If the attribute is a function or a
+  class, then a new `CLI` will be created using that attribute; the
+  name of this new cli will be set to the parent `CLI`'s name
   plus the name of the attribute, as it appears within the class, with
-  a space in the middle. For example, if the parent `Captain`'s name is
+  a space in the middle. For example, if the parent `CLI`'s name is
   "hello" and the function's name, as it appears in the class, is
-  "world", then the name for the new `Captain` created from that
+  "world", then the name for the new `CLI` created from that
   function will be "hello world". However, if the attribute is already
-  a `Captain` then it's name will remain unchanged. All new `Captain`s
-  created by this `Captain`, will be added to this `Captain`, under the
+  a `CLI` then it's name will remain unchanged. All new `CLI`s
+  created by this `CLI`, will be added to this `CLI`, under the
   name of the attribute, as it appeared in the class, plus "_command".
   This is done to improve ease of access, for example to enabled adding
-  options to these created `Captain`s. This is not done for attributes
-  which were already `Captain`s.
+  options to these created `CLI`s. This is not done for attributes
+  which were already `CLI`s.
 
   If the `name` is not specified, then `sys.argv[0]` will be used to
   determine the name of the program.
@@ -169,18 +169,18 @@ class Captain:
   `True` if it's a class.
 
   The `child_kwargs` dictionary is passed as keyword arguments to
-  children `Captain`s created by this `Captain` (only applies if the
+  children `CLI`s created by this `CLI` (only applies if the
   given `ship` is a class).
 
   The `pass_self` parameter can be set to `True` if you want your
-  function to get the `Captain` that was created using it as its first
+  function to get the `CLI` that was created using it as its first
   argument when running.
 
   To run the CLI, call it.
 
   Example single-command CLI:
   ```
-  from libjam import Captain
+  from cli import CLI
   import sys
 
   def echo(text, **options):
@@ -188,16 +188,16 @@ class Captain:
       text += ' world!'
     print(echo)
 
-  cli = Captain(echo)
-  cli.add_option('world', 'Appends " world!"', 'w')
+  echo_cli = CLI(echo)
+  echo_cli.add_option('world', 'Appends " world!"', 'w')
 
   if __name__ == '__main__':
-    sys.exit(cli())
+    sys.exit(echo_cli())
   ```
 
   Example multi-command CLI:
   ```
-  from libjam import Captain
+  from cli import CLI
   import sys
 
   class express:
@@ -207,10 +207,10 @@ class Captain:
     def happiness(*, help=False):
       print("I'm happy")
 
-  cli = Captain(express)
+  express_cli = CLI(express)
 
   if __name__ == '__main__':
-    sys.exit(cli())
+    sys.exit(express_cli())
   ```
   """
 
@@ -269,12 +269,12 @@ class Captain:
         continue
       command_name = name.replace('_', '-')
       if isinstance(attr, (types.FunctionType, type)):
-        command = Captain(
+        command = CLI(
           attr, f'{self.name} {command_name}', **self.child_kwargs,
         )
         setattr(self, name + '_command', command)
         self.commands[command_name] = command
-      elif isinstance(attr, Captain):
+      elif isinstance(attr, CLI):
         self.commands[command_name] = attr
       else:
         raise TypeError(f'Given class has an invalid attribute {attr}')
@@ -301,7 +301,7 @@ class Captain:
 
     The `call` parameter, if specified, will be called during parsing.
     If the option was set by the user. The default help option sets it
-    to the `print_help_and_exit` method of the `Captain`.
+    to the `print_help_and_exit` method of the `CLI`.
 
     When running the CLI, the option will be passed as a keyword
     argument to the appropriate function, if it can accept it.
@@ -473,7 +473,7 @@ class Captain:
     sys.exit(exit_code)
 
 
-def captain(
+def cli(
   name: str = None,
   pass_self: bool = False,
   add_help: bool = True,
@@ -481,25 +481,25 @@ def captain(
   child_kwargs: dict = {},
 ) -> callable:
   """Returns a decorator that takes either a function or a class and
-  returns a `Captain`.
+  returns a `CLI`.
 
   Example usage:
   ```
-  @captain(name='echo')
-  def cli(text):
+  @cli()
+  def echo(text):
     print(text)
   ```
   """
-  def decorator(ship) -> Captain:
+  def decorator(ship) -> CLI:
     nonlocal name
     if not name:
       name = ship.__name__.lower()
-      for suffix in ['captain', 'command', 'cli']:
+      for suffix in ['cli', 'command']:
         name = name.removesuffix(suffix).removesuffix('_')
       name = name.replace('_', '-')
     if not name:
       name = _DEFAULT_NAME
-    return Captain(
+    return CLI(
       ship, name, pass_self, add_help, compact_help, child_kwargs,
     )
   return decorator

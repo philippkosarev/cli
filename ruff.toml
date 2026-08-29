@@ -1,5 +1,5 @@
-include = ["libjam/*"]
-exclude = ["libjam/__init__.py"]
+include = ["cli/*"]
+exclude = ["cli/__init__.py"]
 respect-gitignore = true
 indent-width = 2
 target-version = "py314"
