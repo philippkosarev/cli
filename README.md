@@ -2,10 +2,14 @@
 Create command line interfaces in Python.
 
 ## Installation
-Releases are available on [PyPI](https://pypi.org/project/cli) and can be installed using pip:
+To install the in-development version:
 ```sh
-pip install cli
+pip install git+https://github.com/philippkosarev/cli.git
 ```
+
+> [!NOTE]
+> Stable releases should be coming soon.
+
 
 ## Documentation
 The documentation, with examples, is available [here](https://cli.readthedocs.io).

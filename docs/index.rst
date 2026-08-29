@@ -5,6 +5,19 @@ CLI
 
 Create command line interfaces in Python.
 
+Installation
+------------
+
+To install the in-development version:
+
+.. code-block::
+
+  pip install git+https://github.com/philippkosarev/cli.git
+
+
+.. note:: Stable releases should be coming soon.
+
+
 Examples
 --------
 
