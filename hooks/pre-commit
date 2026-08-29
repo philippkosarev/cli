@@ -1,0 +1,27 @@
+#! /usr/bin/env bash
+
+# Text styles
+bold=$(tput bold)
+normal=$(tput sgr0)
+
+# Checking for potential errors
+ruff --config ruff.toml check
+status=$?
+if [[ $status == "127" ]]; then
+  echo "${bold}
+╭─Commit─Aborted──────────────────────────────────────────────╮
+│ Looks like you don't have ruff installed. This project uses │
+│ ruff to check for potential errors.                         │
+│ To install ruff you can run 'pip install ruff'.             │
+╰─────────────────────────────────────────────────────────────╯\
+${normal}"
+elif [[ $status != "0" ]]; then
+  echo "${bold}
+╭─Commit─Aborted─────────────────────────────────────────────╮
+│ Found potential errors, please fix them before committing. │
+│ To ignore the errors use '--no-verify'.                    │
+╰────────────────────────────────────────────────────────────╯\
+${normal}"
+fi
+
+exit $status

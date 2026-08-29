@@ -1,0 +1,26 @@
+html[data-theme="light"] {
+  --pst-color-background: hsl(30, 100%, 98.5%);
+  --pst-color-surface: hsl(27, 80%, 95.5%);
+  --pst-color-on-background: hsl(30, 100%, 96%);
+  --pst-color-text-base: hsl(10, 85%, 17%);
+  --pst-color-inline-code: hsl(23, 70%, 34%);
+  --pst-color-link-higher-contrast: hsl(25, 70%, 40%);
+  --pst-color-primary: hsl(24, 80%, 45%);
+  --pst-color-secondary: hsl(30, 100%, 50%);
+  --pst-color-accent: hsl(30, 100%, 50%);
+}
+html[data-theme="dark"] {
+  --pst-color-background: hsl(15, 1%, 10%);
+  --pst-color-text-base: hsl(45, 15%, 90%);
+  --pst-color-on-background: hsl(25, 25%, 17.5%);
+  --pst-color-surface: hsl(30, 5%, 13%);
+  --pst-color-border: hsl(30, 20%, 25%);
+  --pst-color-primary: hsl(32, 100%, 75%);
+  --pst-color-inline-code: hsl(27.5, 100%, 70%);
+  --pst-color-secondary: hsl(35, 100%, 60%);
+  --pst-color-secondary-highlight: hsl(35, 100%, 30%);
+  --pst-color-accent: hsl(35, 100%, 60%);
+  --pst-color-link-higher-contrast: hsl(35, 100%, 75%);
+  --pst-color-muted: hsl(35, 20%, 80%);
+  --pst-color-text-muted: hsl(35, 20%, 80%);
+}
