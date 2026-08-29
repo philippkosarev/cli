@@ -4,7 +4,6 @@ import os
 import sys
 import types
 
-
 # Constants
 _DEFAULT_NAME = os.path.basename(sys.argv[0])
 
@@ -135,16 +134,16 @@ class _Option:
 class CLI:
   """Creates a CLI around a given function or class.
 
-  The `ship` can be either a function, to make a single-command CLI, or
+  The `target` can be either a function, to make a single-command CLI, or
   a class, to make a multi-command CLI. Its docstring will be used as
   the CLI's description, shown on the help page.
 
-  If the `ship` is a function, then its parameters will be used to
+  If the `target` is a function, then its parameters will be used to
   create the CLI's arguments. Supports required, optional and arbitrary
   parameters.
 
-  If the `ship` is a class, then its attributes will be used to create
-  the CLI's commands. The `ship`'s attributes can be either other
+  If the `target` is a class, then its attributes will be used to create
+  the CLI's commands. The `target`'s attributes can be either other
   `CLI`s, functions or classes. If the attribute is a function or a
   class, then a new `CLI` will be created using that attribute; the
   name of this new cli will be set to the parent `CLI`'s name
@@ -165,12 +164,12 @@ class CLI:
 
   The `compact_help` parameter decides whether the help page sections
   should be separated by one or two newlines. If not specified, then it
-  will be set to `False` if the specified `ship` is a function, and
+  will be set to `False` if the specified `target` is a function, and
   `True` if it's a class.
 
   The `child_kwargs` dictionary is passed as keyword arguments to
   children `CLI`s created by this `CLI` (only applies if the
-  given `ship` is a class).
+  given `target` is a class).
 
   The `pass_self` parameter can be set to `True` if you want your
   function to get the `CLI` that was created using it as its first
@@ -216,16 +215,16 @@ class CLI:
 
   def __init__(
     self,
-    ship: callable or type,
+    target: callable or type,
     name: str = None,
     pass_self: bool = False,
     add_help: bool = True,
     compact_help: bool = None,
     child_kwargs: dict = {},
   ):
-    self.ship = ship
+    self.target = target
     self.name = name or _DEFAULT_NAME
-    self.description = ship.__doc__
+    self.description = target.__doc__
     self.pass_self = pass_self
     self.compact_help = compact_help
     self.options = []
@@ -236,20 +235,20 @@ class CLI:
         'help', 'Prints this page.', 'h',
         self.print_help_and_exit,
       )
-    if isinstance(ship, types.FunctionType):
+    if isinstance(target, types.FunctionType):
       self._singlecommand_init()
-    elif isinstance(ship, type):
+    elif isinstance(target, type):
       self._multicommand_init()
     else:
-      raise TypeError(f'Invalid ship type {type(ship)}')
+      raise TypeError(f'Invalid target type {type(target)}')
 
   def _singlecommand_init(self):
-    self._function_args = _get_function_args(self.ship)
+    self._function_args = _get_function_args(self.target)
     if self.pass_self:
       try:
         self._function_args[0].pop(0)
       except IndexError:
-        raise TypeError(f'{self.ship} is missing the `self` argument')
+        raise TypeError(f'{self.target} is missing the `self` argument')
     usage = _to_posix_args(*self._function_args)
     self.usage = f'[OPTIONS]... {usage}' if self.options else usage
     self._parse = self._singlecommand_parse
@@ -264,7 +263,7 @@ class CLI:
     if self.compact_help is None:
       self.compact_help = False
     self.commands = {}
-    for name, attr in self.ship.__dict__.items():
+    for name, attr in self.target.__dict__.items():
       if name.startswith('_'):
         continue
       command_name = name.replace('_', '-')
@@ -380,13 +379,13 @@ class CLI:
       if args is None:
         args = sys.argv[1:]
       command, args, opts = self._parse(args)
-      accepts_arbitrary_kwargs = command.ship.__code__.co_flags & 0x08
+      accepts_arbitrary_kwargs = command.target.__code__.co_flags & 0x08
       if not accepts_arbitrary_kwargs:
         kwargs = command._function_args[1]
         opts = {k: v for k, v in opts.items() if k in kwargs}
       if command.pass_self:
         args.insert(0, command)
-      return command.ship(*args, **opts)
+      return command.target(*args, **opts)
     except KeyboardInterrupt:
       print('^C', file=sys.stderr)
       sys.exit(130)
@@ -490,16 +489,16 @@ def cli(
     print(text)
   ```
   """
-  def decorator(ship) -> CLI:
+  def decorator(target) -> CLI:
     nonlocal name
     if not name:
-      name = ship.__name__.lower()
+      name = target.__name__.lower()
       for suffix in ['cli', 'command']:
         name = name.removesuffix(suffix).removesuffix('_')
       name = name.replace('_', '-')
     if not name:
       name = _DEFAULT_NAME
     return CLI(
-      ship, name, pass_self, add_help, compact_help, child_kwargs,
+      target, name, pass_self, add_help, compact_help, child_kwargs,
     )
   return decorator
