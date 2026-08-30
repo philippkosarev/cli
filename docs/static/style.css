@@ -9,6 +9,7 @@ html[data-theme="light"] {
   --pst-color-secondary: hsl(30, 100%, 50%);
   --pst-color-accent: hsl(30, 100%, 50%);
 }
+
 html[data-theme="dark"] {
   --pst-color-background: hsl(15, 1%, 10%);
   --pst-color-text-base: hsl(45, 15%, 90%);

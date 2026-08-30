@@ -6,7 +6,7 @@ import cli
 
 
 # Creating the CLI
-@cli.cli('very-smart-ai')
+@cli('very-smart-ai')
 class main:
   """Trust me, it's the smartest one out there."""
 

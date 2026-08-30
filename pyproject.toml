@@ -33,6 +33,7 @@ docs = [
   "sphinx-copybutton",
   "pypandoc",
   "pypandoc-binary",
+  "sphinxcontrib-programoutput",
 ]
 
 [build-system]

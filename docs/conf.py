@@ -23,9 +23,10 @@ extensions = [
   'sphinx.ext.autodoc',
   'sphinx_copybutton',
   'sphinx_toolbox.more_autodoc.variables',
+  'sphinxcontrib.programoutput',
 ]
 
-# Default autodoc options
+# Defaults
 autodoc_default_options = {
   'members': True,
   'member-order': 'bysource',

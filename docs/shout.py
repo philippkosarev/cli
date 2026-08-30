@@ -3,7 +3,7 @@
 import cli
 
 # Creating the CLI
-@cli.cli
+@cli
 @cli.opt('world', 'Adds " world" before the exclamation mark.', 'w')
 def shout(text: str, **opts):
   """Shouts the given text back."""
