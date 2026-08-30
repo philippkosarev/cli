@@ -1,1 +1,1 @@
-from ._lib import CLI, cli
+from ._lib import CLI, cli, opt

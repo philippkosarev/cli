@@ -1,4 +1,5 @@
 .ONESHELL:
+.PHONY: docs
 
 build_dir := build
 venv_dir := venv

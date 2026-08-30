@@ -45,7 +45,7 @@ html_theme_options = {
   'icon_links': [
     {
       'name': 'GitHub',
-      'url': 'https://github.com/philippkosarev/libjam',
+      'url': 'https://github.com/philippkosarev/cli',
       'icon': 'fa-brands fa-github',
       'type': 'fontawesome',
     },

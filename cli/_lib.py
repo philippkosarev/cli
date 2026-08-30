@@ -116,13 +116,33 @@ class _HelpPage:
 
 @dataclass
 class _Option:
+  """An option for the `CLI`."""
+
   name: str
   description: str|None
   shorthand: str|None
-  call: callable|None
+  call: function|None
+
+  def __init__(
+    self,
+    name: str,
+    description: str|None = None,
+    shorthand: str|None = None,
+    call: function|None = None,
+  ):
+    if len(name) < 1:
+      raise TypeError('Option `name` contain at least 1 character')
+    self.name = name
+    self.description = description
+    if shorthand is not None:
+      if len(shorthand) > 1:
+        raise TypeError('Option `shorthand` can contain at most 1 character')
+    self.shorthand = shorthand
+    self.call = call
 
   @property
   def flags(self) -> list:
+    """List of option's flags."""
     items = []
     if self.shorthand:
       items.append('-' + self.shorthand)
@@ -178,15 +198,15 @@ class CLI:
 
   Example single-command CLI:
   ```
-  from cli import CLI
   import sys
+  import cli
 
   def echo(text, **options):
     if options['world']:
       text += ' world!'
     print(echo)
 
-  echo_cli = CLI(echo)
+  echo_cli = cli.CLI(echo)
   echo_cli.add_option('world', 'Appends " world!"', 'w')
 
   if __name__ == '__main__':
@@ -195,8 +215,8 @@ class CLI:
 
   Example multi-command CLI:
   ```
-  from cli import CLI
   import sys
+  import cli
 
   class express:
     def sadness(**opts):
@@ -205,7 +225,7 @@ class CLI:
     def happiness(*, help=False):
       print("I'm happy")
 
-  express_cli = CLI(express)
+  express_cli = cli.CLI(express)
 
   if __name__ == '__main__':
     sys.exit(express_cli())
@@ -266,10 +286,18 @@ class CLI:
       if name.startswith('_'):
         continue
       command_name = name.replace('_', '-')
+      if isinstance(attr, tuple):
+        attr, opts = attr
+      else:
+        attr, opts = (attr, None)
       if isinstance(attr, (function, type)):
         command = CLI(
           attr, f'{self.name} {command_name}', **self.child_kwargs,
         )
+        if opts:
+          if command.add_help:
+            opts.append(command.options.pop(-1))
+          command.options = opts
         setattr(self, name + '_command', command)
         self.commands[command_name] = command
       elif isinstance(attr, CLI):
@@ -284,12 +312,13 @@ class CLI:
     name: str,
     description: str|None = None,
     shorthand: str|None = None,
-    call: callable|None = None,
+    call: function|None = None,
   ):
     """Adds an option to the CLI.
 
-    The `name` parameter will used as the key in the `dict` that the
-    `parse` method returns and to create the long flag for the CLI.
+    The `name` parameter will used as to create the long flag for the
+    CLI and as the key in the `dict` that the target function will get
+    as a keyword argument when running the CLI.
 
     The `description` parameter, if specified, will be shown in the
     help page, after the option's flags.
@@ -304,11 +333,6 @@ class CLI:
     When running the CLI, the option will be passed as a keyword
     argument to the appropriate function, if it can accept it.
     """
-    if len(name) < 2:
-      raise TypeError('Option name must contain at least 2 characters')
-    if shorthand:
-      if len(shorthand) > 1:
-        raise TypeError('Option shorthand must be 1 character long')
     option = _Option(name, description, shorthand, call)
     if self.add_help:
       self.options.insert(-1, option)
@@ -477,33 +501,90 @@ def cli(
   add_help: bool = True,
   compact_help: bool|None = None,
   child_kwargs: dict|None = None,
-) -> callable:
-  """Returns a decorator that takes either a function or a class and
-  returns a `CLI`.
+) -> CLI|function:
+  """Class/function decorator that creates an instance of `CLI`.
 
   Example usage:
   ```
-  @cli
+  import cli
+
+  @cli.cli
   def echo(text):
     print(text)
   ```
 
   or
   ```
-  @cli(name='echo')
+  import cli
+
+  @cli.cli(name='echo')
   def main(text):
     print(text)
   ```
   """
-  name_is_target = isinstance(name, (function, type))
+  name_is_target = isinstance(name, (function, type, tuple))
   if name_is_target:
     target = name
   if not name or name_is_target:
     name = _DEFAULT_NAME
-  def decorator(target) -> CLI:
-    return CLI(
-      target, name, pass_self, add_help, compact_help, child_kwargs,
+  def decorator(arg: function|type|tuple) -> CLI:
+    if isinstance(arg, tuple):
+      target, opts = arg
+    else:
+      target = arg
+      opts = None
+    new_cli = CLI(
+      target, name, pass_self,
+      add_help, compact_help,
+      child_kwargs,
     )
+    if opts:
+      if new_cli.add_help:
+        opts.append(new_cli.options.pop(-1))
+      new_cli.options = opts
+    return new_cli
   if name_is_target:
     return decorator(target)
+  return decorator
+
+
+def opt(
+  name: str,
+  description: str|None = None,
+  shorthand: str|None = None,
+  call: function|None = None,
+) -> tuple:
+  """Decorator that adds an option to the preceding `cli` decorator.
+
+  Example usage:
+  ```
+  import cli
+
+  @cli.cli
+  @cli.opt('loud')
+  def echo(text, **opts):
+    if opts['loud']:
+      text += '!'
+    print(text)
+  ```
+
+  or
+  ```
+  @cli.cli('echo')
+  @cli.opt('loud')
+  def main(text, **opts):
+    if opts['loud']:
+      text += '!'
+    print(text)
+  ```
+  """
+  opts = [_Option(name, description, shorthand, call)]
+  def decorator(arg: function|type|tuple) -> tuple:
+    nonlocal opts
+    if isinstance(arg, tuple):
+      target = arg[0]
+      opts += arg[1]
+    else:
+      target = arg
+    return (target, opts)
   return decorator

@@ -3,7 +3,7 @@ https://github.com/philippkosarev/cli
 CLI
 ===
 
-Create command line interfaces in Python.
+Python library for writing command **interfaces**, *not parsers*.
 
 Installation
 ------------
@@ -75,13 +75,13 @@ Here is what the user will see when running this CLI:
 
   $ ./multi.py wonder -h
   Usage:
-     very-smart-ai wonder
+     very-smart-ai wonder [OPTIONS]...
   Description:
-     Where's my copy of My weekend in Stevenage by Filthy Henderson?
+     Where's my copy of My Weekend in Stevenage by Filthy Henderson?
   Options:
-        --mcbeth - Ponder whether to be or not to be.
-     -q --quiet  - Be quiet.
-     -h --help   - Prints this page.
+         --mcbeth - Ponder whether to be or not to be.
+     -q, --quiet  - Be quiet.
+     -h, --help   - Prints this page.
 
   $ ./multi.py wonder --mcbeth
   I just want to be a fish.
@@ -95,20 +95,23 @@ Here is what the user will see when running this CLI:
   Commands:
      shout   - I will be loud!
      whisper - Shhhh! You don't want them to hear you...
-     wonder  - Where's my copy of My weekend in Stevenage by Filthy Henderson?
+     wonder  - Where's my copy of My Weekend in Stevenage by Filthy Henderson?
 
   Usage:
-     shout <TEXT> [SUFFIX]
-     whisper [LINES]...
-     wonder
+     shout [OPTIONS]... <TEXT> [SUFFIX]
+     whisper [OPTIONS]... [LINES]...
+     wonder [OPTIONS]...
 
   Options:
-     -h --help - Prints this page.
+     -h, --help - Prints this page.
 
 
 API
 ---
 
+.. autofunction:: cli.cli
+
+.. autofunction:: cli.opt
+
 .. autoclass:: cli.CLI
 
-.. autofunction:: cli.cli

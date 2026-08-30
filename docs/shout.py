@@ -1,20 +1,16 @@
 #! /usr/bin/env python3
 
-from cli import cli
+import cli
 
 # Creating the CLI
-@cli
+@cli.cli
+@cli.opt('world', 'Adds " world" before the exclamation mark.', 'w')
 def shout(text: str, **opts):
   """Shouts the given text back."""
   if opts['world']:
     text += ' world'
   print(text + '!')
   return 'anything'
-
-# Adding an option to the CLI
-shout.add_option(
-  'world', 'Adds " world" before the exclamation mark.', 'w',
-)
 
 # Running the CLI
 returned = shout()
