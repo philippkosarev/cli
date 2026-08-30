@@ -109,7 +109,7 @@ Here is what the user will see when running this CLI:
 API
 ---
 
-.. autofunction:: cli.cli
+.. autofunction:: cli.__call__
 
 .. autofunction:: cli.opt
 

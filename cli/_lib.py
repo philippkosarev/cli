@@ -53,9 +53,7 @@ def _classify_args(items: list[str], /) -> tuple[list, list]:
     if item == '--':
       args += items[i+1 :]
       break
-    elif item.startswith('--'):
-      flags.append(item)
-    elif item == '-':
+    elif item == '-' or item.startswith('--'):
       flags.append(item)
     elif item.startswith('-'):
       flags += ['-' + i for i in list(item.removeprefix('-'))]
@@ -134,9 +132,8 @@ class _Option:
       raise TypeError('Option `name` contain at least 1 character')
     self.name = name
     self.description = description
-    if shorthand is not None:
-      if len(shorthand) > 1:
-        raise TypeError('Option `shorthand` can contain at most 1 character')
+    if shorthand is not None and len(shorthand) > 1:
+      raise TypeError('Option `shorthand` can contain at most 1 character')
     self.shorthand = shorthand
     self.call = call
 
@@ -289,7 +286,7 @@ class CLI:
       if isinstance(attr, tuple):
         attr, opts = attr
       else:
-        attr, opts = (attr, None)
+        opts = None
       if isinstance(attr, (function, type)):
         command = CLI(
           attr, f'{self.name} {command_name}', **self.child_kwargs,
@@ -393,7 +390,7 @@ class CLI:
       opts.setdefault(key, value)
     return (command, args, opts)
 
-  def __call__(self, args: list[str] = None) -> any:
+  def __call__(self, args: list|None = None) -> any:
     """Runs the CLI.
 
     If `args` is not specified, then `sys.argv[1:]` will be used.
@@ -508,7 +505,7 @@ def cli(
   ```
   import cli
 
-  @cli.cli
+  @cli
   def echo(text):
     print(text)
   ```
@@ -517,7 +514,7 @@ def cli(
   ```
   import cli
 
-  @cli.cli(name='echo')
+  @cli(name='echo')
   def main(text):
     print(text)
   ```
@@ -560,7 +557,7 @@ def opt(
   ```
   import cli
 
-  @cli.cli
+  @cli
   @cli.opt('loud')
   def echo(text, **opts):
     if opts['loud']:
@@ -570,7 +567,7 @@ def opt(
 
   or
   ```
-  @cli.cli('echo')
+  @cli('echo')
   @cli.opt('loud')
   def main(text, **opts):
     if opts['loud']:
