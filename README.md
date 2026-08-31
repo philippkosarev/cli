@@ -17,4 +17,4 @@ pip install git+https://github.com/philippkosarev/cli.git
 
 
 ## Documentation
-The documentation, with examples, is available [here](https://cli.readthedocs.io).
+The documentation, with examples, is available [here](https://philippkosarev.github.io/cli).
