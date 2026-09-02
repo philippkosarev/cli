@@ -38,11 +38,9 @@ html_static_path = ['static']
 html_css_files = ['style.css']
 html_sidebars = { '**': []}
 html_theme_options = {
-  'show_nav_level': 0,
-  'navigation_depth': 3,
-  'collapse_navigation': False,
-  'pygments_light_style': 'gruvbox-light',
-  'pygments_dark_style': 'zenburn',
+  'secondary_sidebar_items': [],
+  'pygments_light_style': 'tango',
+  'pygments_dark_style': 'monokai',
   'icon_links': [
     {
       'name': 'GitHub',
