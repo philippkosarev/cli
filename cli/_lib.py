@@ -438,7 +438,8 @@ class CLI:
       self.usage_error(f"unknown command '{command_name}'")
     command, args, opts = command._parse(args)
     for key, value in local_opts.items():
-      opts.setdefault(key, value)
+      if value:
+        opts[key] = value
     return (command, args, opts)
 
   def __call__(self, args: list|None = None) -> any:
@@ -450,10 +451,14 @@ class CLI:
       if args is None:
         args = sys.argv[1:]
       command, args, opts = self._parse(args)
-      accepts_arbitrary_kwargs = command.target.__code__.co_flags & 0x08
+      code = command.target.__code__
+      accepts_arbitrary_kwargs = code.co_flags & 0x08
       if not accepts_arbitrary_kwargs:
-        kwargs = command._function_args[1]
-        opts = {k: v for k, v in opts.items() if k in kwargs}
+        required, optional, arbitrary = command._function_args
+        n_pos_args = len(required) + len(optional)
+        n_keyword_args = code.co_kwonlyargcount
+        keyword_args = code.co_varnames[n_pos_args : n_pos_args+n_keyword_args]
+        opts = {k: opts[k] for k in opts if k in keyword_args}
       if command.pass_self:
         args.insert(0, command)
       return command.target(*args, **opts)

@@ -6,9 +6,9 @@ import cli
 @cli(options=[
   ('world', 'Appends " world" before the exclamation mark.', 'w'),
 ])
-def shout(text: str, **opts):
+def shout(text: str, *, world: bool = False):
   """Shouts the given text back."""
-  if opts['world']:
+  if world:
     text += ' world'
   print(text + '!')
   return 'anything'
