@@ -113,8 +113,26 @@ class _HelpPage:
 
 
 @dataclass
-class _Option:
-  """An option for the `CLI`."""
+class Option:
+  """An option for the `CLI`.
+
+  The `name` parameter will used as to create the long flag for the
+  CLI and as the key in the `dict` that the target function will get
+  as a keyword argument when running the CLI.
+
+  The `description` parameter, if specified, will be shown in the help
+  page, after the option's flags.
+
+  The `shorthand` parameter, if specified, will be used to create the
+  short flag for the CLI. It must be 1 a character-long string.
+
+  The `call` parameter, if specified, will be called during parsing.
+  If the option was set by the user. The default help option sets it
+  to the `print_help_and_exit` method of the `CLI`.
+
+  When running the CLI, the option will be passed as a keyword
+  argument to the appropriate function, if it can accept it.
+  """
 
   name: str
   description: str|None
@@ -130,10 +148,10 @@ class _Option:
   ):
     if len(name) < 1:
       raise TypeError('Option `name` contain at least 1 character')
-    self.name = name
-    self.description = description
     if shorthand is not None and len(shorthand) > 1:
       raise TypeError('Option `shorthand` can contain at most 1 character')
+    self.name = name
+    self.description = description
     self.shorthand = shorthand
     self.call = call
 
@@ -145,6 +163,56 @@ class _Option:
       items.append('-' + self.shorthand)
     items.append('--' + self.name)
     return items
+
+
+@dataclass
+class Partial:
+  """An incomplete `CLI`.
+
+  Used to override specific defaults on not-yet-created sub-CLIs of a
+  multi-command `CLI`.
+  """
+
+  target: function|type
+  name: str|None
+  kwargs: dict
+
+  def __init__(
+    self,
+    target: function|type,
+    name: str|None = None,
+    **kwargs,
+  ):
+    self.target = target
+    self.name = name
+    self.kwargs = kwargs
+
+
+def part(
+  name: str|None = None,
+  **kwargs,
+) -> function:
+  """Class/function decorator that creates a `Partial` instance.
+
+  Usage example:
+  ```
+  import cli
+
+  @cli
+  class talk:
+    def whisper(text):
+      print(text + '...')
+
+    @cli.part(options=[('world',)])
+    def shout(text, **opts):
+      if opts['world']:
+        text += ' world'
+      print(text + '!')
+  ```
+  """
+  def decorator(target: function|type) -> Partial:
+    return Partial(target, name, **kwargs)
+  return decorator
 
 
 class CLI:
@@ -168,28 +236,37 @@ class CLI:
   "hello" and the function's name, as it appears in the class, is
   "world", then the name for the new `CLI` created from that
   function will be "hello world". However, if the attribute is already
-  a `CLI` then it's name will remain unchanged. All new `CLI`s
-  created by this `CLI`, will be added to this `CLI`, under the
-  name of the attribute, as it appeared in the class, plus "_command".
-  This is done to improve ease of access, for example to enabled
-  adding options to these created `CLI`s. This is not done for
-  attributes which were already `CLI`s.
+  a `CLI` then it's name will remain unchanged.
 
   If the `name` is not specified, then `sys.argv[0]` will be used to
   determine the name of the program.
+
+  The `options` parameter, if specified, must be a list of `Option`
+  instances, or tuples with arguments to create the `Option`.
+  For example, this:
+  ```
+  cli.CLI(func, options=[cli.Option('loud', 'Louder meow.')])
+  ```
+  is equivalent to this:
+  ```
+  cli.CLI(func, options=[('loud', 'Louder meow.')])
+  ```
+
+  The `add_help` parameter controls whether the default option is
+  added to the `CLI`.
 
   The `compact_help` parameter decides whether the help page sections
   should be separated by one or two newlines. If not specified, then
   it will be set to `False` if the specified `target` is a function,
   and `True` if it's a class.
 
-  The `child_kwargs` dictionary is passed as keyword arguments to
-  children `CLI`s created by this `CLI` (only applies if the
-  given `target` is a class).
-
   The `pass_self` parameter can be set to `True` if you want your
   function to get the `CLI` that was created using it as its first
   argument when running.
+
+  The `child_kwargs` dictionary is passed as keyword arguments to
+  children `CLI`s created by this `CLI` (only applies if the
+  given `target` is a class).
 
   To run the CLI, call it.
 
@@ -233,30 +310,41 @@ class CLI:
     self,
     target: function|type,
     name: str|None = None,
-    pass_self: bool = False,
+    *,
+    options: list|None = None,
     add_help: bool = True,
     compact_help: bool|None = None,
+    pass_self: bool = False,
     child_kwargs: dict|None = None,
   ):
-    self.target = target
-    self.name = name or _DEFAULT_NAME
-    self.description = target.__doc__
-    self.pass_self = pass_self
-    self.compact_help = compact_help
-    self.options = []
-    self.add_help = add_help
-    self.child_kwargs = child_kwargs or {}
-    if add_help:
-      self.add_option(
-        'help', 'Prints this page.', 'h',
-        self.print_help_and_exit,
-      )
     if isinstance(target, function):
-      self._singlecommand_init()
+      self._init = self._singlecommand_init
     elif isinstance(target, type):
-      self._multicommand_init()
+      self._init = self._multicommand_init
     else:
       raise TypeError(f'Invalid target type {type(target)}')
+    self.target = target
+    self.name = name or _DEFAULT_NAME
+    self.pass_self = pass_self
+    self.compact_help = compact_help
+    self.child_kwargs = child_kwargs or {}
+    self.options = options or []
+    for i, opt in enumerate(self.options):
+      if isinstance(opt, (tuple, list)):
+        self.options[i] = Option(*opt)
+      elif not isinstance(opt, Option):
+        raise TypeError(f'Expected an `Option` instance, got {opt}')
+    if add_help:
+      help_option = Option(
+        'help', 'Prints this page.', 'h', self.print_help_and_exit,
+      )
+      self.options.append(help_option)
+    self._init()
+
+  @property
+  def description(self) -> str|None:
+    """The `target`'s docstring."""
+    return self.target.__doc__
 
   def _singlecommand_init(self):
     self._function_args = _get_function_args(self.target)
@@ -264,7 +352,7 @@ class CLI:
       try:
         self._function_args[0].pop(0)
       except IndexError:
-        raise TypeError(f'{self.target} is missing the `self` argument')
+        raise TypeError(f'{self.target} is missing the `self` parameter')
     usage = _to_posix_args(*self._function_args)
     self.usage = f'[OPTIONS]... {usage}' if self.options else usage
     self._parse = self._singlecommand_parse
@@ -279,62 +367,25 @@ class CLI:
     if self.compact_help is None:
       self.compact_help = False
     self.commands = {}
-    for name, attr in self.target.__dict__.items():
+    for name, subcli in self.target.__dict__.items():
       if name.startswith('_'):
         continue
       command_name = name.replace('_', '-')
-      if isinstance(attr, tuple):
-        attr, opts = attr
-      else:
-        opts = None
-      if isinstance(attr, (function, type)):
-        command = CLI(
-          attr, f'{self.name} {command_name}', **self.child_kwargs,
-        )
-        if opts:
-          if command.add_help:
-            opts.append(command.options.pop(-1))
-          command.options = opts
-        setattr(self, name + '_command', command)
-        self.commands[command_name] = command
-      elif isinstance(attr, CLI):
-        self.commands[command_name] = attr
-      else:
-        raise TypeError(f'Given class has an invalid attribute {attr}')
+      subcli_name = f'{self.name} {command_name}'
+      if isinstance(subcli, (function, type)):
+        subcli = CLI(subcli, subcli_name, **self.child_kwargs)
+      elif isinstance(subcli, Partial):
+        if subcli.name:
+          subcli_name = subcli.name
+        subcli_kwargs = self.child_kwargs.copy()
+        for key, value in subcli.kwargs.items():
+          subcli_kwargs[key] = value
+        subcli = CLI(subcli.target, subcli_name, **subcli_kwargs)
+      elif not isinstance(subcli, CLI):
+        raise TypeError(f'Invalid target class attribute type {type(subcli)}')
+      self.commands[command_name] = subcli
     if not self.commands:
-      raise TypeError('Given class cannot be empty')
-
-  def add_option(
-    self,
-    name: str,
-    description: str|None = None,
-    shorthand: str|None = None,
-    call: function|None = None,
-  ):
-    """Adds an option to the CLI.
-
-    The `name` parameter will used as to create the long flag for the
-    CLI and as the key in the `dict` that the target function will get
-    as a keyword argument when running the CLI.
-
-    The `description` parameter, if specified, will be shown in the
-    help page, after the option's flags.
-
-    The `shorthand` parameter, if specified, will be used to create the
-    short flag for the CLI. It must be 1 a character-long string.
-
-    The `call` parameter, if specified, will be called during parsing.
-    If the option was set by the user. The default help option sets it
-    to the `print_help_and_exit` method of the `CLI`.
-
-    When running the CLI, the option will be passed as a keyword
-    argument to the appropriate function, if it can accept it.
-    """
-    option = _Option(name, description, shorthand, call)
-    if self.add_help:
-      self.options.insert(-1, option)
-    else:
-      self.options.append(option)
+      raise TypeError('Target class cannot be empty')
 
   def _parse_flags(self, flags: list[str]) -> dict[str: bool]:
     parsed = {}
@@ -492,13 +543,7 @@ class CLI:
     sys.exit(exit_code)
 
 
-def cli(
-  name: str|None = None,
-  pass_self: bool = False,
-  add_help: bool = True,
-  compact_help: bool|None = None,
-  child_kwargs: dict|None = None,
-) -> CLI|function:
+def cli(name: str|None = None, **kwargs) -> CLI|function:
   """Class/function decorator that creates an instance of `CLI`.
 
   Example usage:
@@ -519,69 +564,13 @@ def cli(
     print(text)
   ```
   """
-  name_is_target = isinstance(name, (function, type, tuple))
+  name_is_target = isinstance(name, (function, type))
   if name_is_target:
     target = name
   if not name or name_is_target:
     name = _DEFAULT_NAME
-  def decorator(arg: function|type|tuple) -> CLI:
-    if isinstance(arg, tuple):
-      target, opts = arg
-    else:
-      target = arg
-      opts = None
-    new_cli = CLI(
-      target, name, pass_self,
-      add_help, compact_help,
-      child_kwargs,
-    )
-    if opts:
-      if new_cli.add_help:
-        opts.append(new_cli.options.pop(-1))
-      new_cli.options = opts
-    return new_cli
+  def decorator(target: function|type) -> CLI:
+    return CLI(target, name, **kwargs)
   if name_is_target:
     return decorator(target)
-  return decorator
-
-
-def opt(
-  name: str,
-  description: str|None = None,
-  shorthand: str|None = None,
-  call: function|None = None,
-) -> tuple:
-  """Decorator that adds an option to the preceding `cli` decorator.
-
-  Example usage:
-  ```
-  import cli
-
-  @cli
-  @cli.opt('loud')
-  def echo(text, **opts):
-    if opts['loud']:
-      text += '!'
-    print(text)
-  ```
-
-  or
-  ```
-  @cli('echo')
-  @cli.opt('loud')
-  def main(text, **opts):
-    if opts['loud']:
-      text += '!'
-    print(text)
-  ```
-  """
-  opts = [_Option(name, description, shorthand, call)]
-  def decorator(arg: function|type|tuple) -> tuple:
-    nonlocal opts
-    if isinstance(arg, tuple):
-      target = arg[0]
-      opts += arg[1]
-    else:
-      target = arg
-    return (target, opts)
   return decorator

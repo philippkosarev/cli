@@ -66,9 +66,12 @@ Here is what the user will see when running this CLI:
 API
 ---
 
-.. autofunction:: cli.__call__
-
-.. autofunction:: cli.opt
-
 .. autoclass:: cli.CLI
 
+.. autofunction:: cli.__call__
+
+.. autoclass:: cli.Option
+
+.. autoclass:: cli.Partial
+
+.. autofunction:: cli.part

@@ -23,8 +23,10 @@ class main:
     text = '\n'.join(lines)
     print(text)
 
-  @cli.opt('mcbeth', 'Ponder whether to be or not to be.')
-  @cli.opt('quiet', 'Be quiet.', 'q')
+  @cli.part(options=[
+    ('mcbeth', 'Ponder whether to be or not to be.'),
+    ('quiet', 'Be quiet.', 'q'),
+  ])
   def wonder(**opts):
     """Where's my copy of My Weekend in Stevenage by Filthy Henderson?"""
     if opts['mcbeth']:
