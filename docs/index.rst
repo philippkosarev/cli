@@ -3,7 +3,7 @@ https://github.com/philippkosarev/cli
 CLI
 ===
 
-Python library for writing command **interfaces**, *not parsers*.
+Python library for writing command line **interfaces**, *not parsers*.
 
 Installation
 ------------
