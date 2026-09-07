@@ -9,6 +9,8 @@ The traditional way of creating command line interfaces in Python involves initi
 
 This library aims to forgo the boilerplate entirely, instead using Python's great introspection features to allow creation of portable, quick and intuitive command line __interfaces__.
 
+To that end, this library does not aim to fit every use-case. Instead, it only supports creation of POSIX-style command line interfaces, with consistency and user experience in mind.
+
 ## Quickstart
 ### Installation
 To install the in-development version:
@@ -19,7 +21,7 @@ pip install git+https://github.com/philippkosarev/cli.git
 > Stable releases should be coming soon.
 
 ### First CLI
-Let's say we want to create a CLI around a function called `shout` which echoes the given input and appends a `!` to the end:
+Let's say we want to create a CLI around a function called `shout` which echoes the given input and appends an exclamation mark:
 ```py
 def shout(text):
   print(text + '!')
@@ -62,7 +64,7 @@ import cli
 def shout(text):
   print(text + '!')
 
-shout_cli = cli(main)
+shout_cli = cli(shout)
 shout_cli()
 ```
 
