@@ -33,22 +33,18 @@ autodoc_default_options = {
 }
 
 # HTML theme options
-html_theme = 'pydata_sphinx_theme'
+html_theme = 'shibuya'
 html_static_path = ['static']
 html_css_files = ['style.css']
 html_sidebars = { '**': []}
 html_theme_options = {
-  'secondary_sidebar_items': [],
-  'pygments_light_style': 'tango',
-  'pygments_dark_style': 'monokai',
-  'icon_links': [
-    {
+  'page_layout': 'simple',
+  'accent_color': 'blue',
+  'nav_socials': [{
       'name': 'GitHub',
       'url': 'https://github.com/philippkosarev/cli',
-      'icon': 'fa-brands fa-github',
-      'type': 'fontawesome',
-    },
-  ]
+      'icon': 'simple-icons:github',
+  }],
 }
 
 # Hooks and directives

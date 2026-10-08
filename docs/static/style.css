@@ -1,37 +1,80 @@
-html[data-theme="light"] {
-  --pst-color-background: hsl(210, 35%, 92%);
-  --pst-color-text-base: hsl(210, 50%, 10%);
-  --pst-color-on-background: hsl(205, 100%, 97%);
-  --pst-color-surface: hsl(220, 30%, 90%);
-  --pst-color-border: hsl(220, 30%, 80%);
-  --pst-color-primary: hsl(210, 90%, 40%);
-  --pst-color-inline-code: hsl(210, 100%, 30%);
-  --pst-color-secondary: hsl(210, 40%, 65%);
-  --pst-color-secondary-highlight: hsl(210, 50%, 50%);
-  --pst-color-accent: hsl(200, 100%, 85%);
-  --pst-color-link-higher-contrast: red;
-  --pst-color-muted: hsl(210, 100%, 5%);
-  --pst-color-text-muted: hsl(215, 100%, 20%);
-  --pst-color-info-bg: hsl(200, 10%, 80%);
-  --pst-color-info: hsl(215, 100%, 35%);
-  --pst-color-target: hsl(215, 45%, 85%);
+:root {
+  --sy-f-sys: "System UI";
 }
 
-html[data-theme="dark"] {
-  --pst-color-background: hsl(210, 20%, 10%);
-  --pst-color-text-base: hsl(210, 50%, 90%);
-  --pst-color-on-background: hsl(210, 15%, 15%);
-  --pst-color-surface: hsl(210, 20%, 15%);
-  --pst-color-border: hsl(200, 10%, 25%);
-  --pst-color-primary: hsl(210, 100%, 75%);
-  --pst-color-inline-code: hsl(210, 100%, 80%);
-  --pst-color-secondary: hsl(210, 30%, 35%);
-  --pst-color-secondary-highlight: hsl(210, 50%, 40%);
-  --pst-color-accent: hsl(200, 30%, 25%);
-  --pst-color-link-higher-contrast: red;
-  --pst-color-muted: hsl(210, 60%, 85%);
-  --pst-color-text-muted: hsl(215, 20%, 75%);
-  --pst-color-info-bg: hsl(200, 10%, 25%);
-  --pst-color-info: hsl(215, 85%, 60%);
-  --pst-color-target: hsl(220, 30%, 16%);
+/* Corner rounding */
+html, .highlight { --radius: 10px; }
+.admonition, .note { border-radius: var(--radius); }
+p.admonition-title { border-radius: var(--radius) var(--radius) 0 0; }
+.searchbox input {border-radius: var(--radius); }
+
+/* Removing blur from header */
+.sy-head-blur {
+  background-color: var(--sy-color-bg) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Removing the poking out icon from notes */
+.admonition.note {
+  --color-3: transparent;
+  --color-4: var(--sy-c-bold);
+}
+.admonition.note::after {
+  display: none;
+}
+
+/* Making the gap between code blocks smaller */
+.yue section > div {
+  margin-bottom: 1rem;
+}
+
+/* Light theme colours */
+html.light {
+  --sy-c-background: hsl(210, 40%, 90%);
+  --sy-c-heading: hsl(210, 80%, 15%);
+  --sy-c-text: hsl(210, 50%, 10%);
+  --sy-c-bold: hsl(210, 100%, 15%);
+  --code-block-background: hsl(210, 30%, 86%);
+  --sy-c-surface: hsl(210, 100%, 30%, 7.5%);
+  --sig-typehint: hsl(210, 70%, 35%);
+  --sy-c-foot-divider: var(--sy-c-background);
+  --sy-c-foot-background: var(--sy-c-background);
+}
+html.light .sy-head {
+  background-color: hsl(205, 70%, 95%);
+}
+html.light[data-accent-color='blue'] {
+  --accent-9: hsl(210, 100%, 70%);
+  --accent-10: hsl(220, 50%, 30%);
+}
+html.light .admonition.note {
+  --color-1: hsl(210, 30%, 86%); /* background */
+  --color-2: hsl(210, 100%, 35%, 15%); /* top bar */
+}
+
+/* Dark theme colours */
+html.dark {
+  --sy-c-background: hsl(210, 20%, 10%);
+  --sy-c-heading: hsl(210, 10%, 85%);
+  --sy-c-text: hsl(210, 40%, 90%);
+  --sy-c-bold: hsl(210, 50%, 90%);
+  --yue-c-code-text: hsl(215, 100%, 80%);
+  --yue-c-code-background: hsl(210, 20%, 16%);
+  --code-block-background: hsl(210, 20%, 14%);
+  --sy-c-surface: hsl(215, 100%, 70%, 7.5%);
+  --sig-typehint: hsl(210, 80%, 60%);
+  --sy-c-foot-divider: var(--sy-c-background);
+  --sy-c-foot-background: var(--sy-c-background);
+}
+html.dark .sy-head {
+  background-color: hsl(210, 17%, 17%);
+}
+html.dark[data-accent-color='blue'] {
+  --accent-9: hsl(210, 90%, 40%);
+  --accent-10: hsl(220, 100%, 85%);
+}
+html.dark .admonition.note {
+  --color-1: hsl(210, 22.5%, 15%);
+  --color-2: hsl(210, 50%, 50%, 40%);
 }

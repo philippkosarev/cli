@@ -29,7 +29,7 @@ documentation = "https://cli.readthedocs.io"
 docs = [
   "sphinx >= 8.2, < 9",
   "sphinx-toolbox >= 4.1.2, < 5",
-  "pydata-sphinx-theme",
+  "shibuya",
   "sphinx-copybutton",
   "pypandoc",
   "pypandoc-binary",
